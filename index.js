@@ -6,14 +6,16 @@ import pathActionsReducer from './src/actions/PathActions';
 import WadSelector from './src/WadSelector';
 import wadSelectorActionsReducer from './src/actions/WadSelectorActions'
 
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css";
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 
 const toolstore = combineReducers({
-  path: pathActionsReducer,
-  files: wadSelectorActionsReducer,
+  nodes: wadSelectorActionsReducer,
 })
 
 const App = () => (

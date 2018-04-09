@@ -1,48 +1,37 @@
-import StructureView from './StructureView';
-
 import { connect } from 'react-redux';
-import { at } from 'lodash';
+import { Classes, Tree } from '@blueprintjs/core';
+import { nodeExpand } from './actions/WadSelectorActions'
+import React from 'react';
 
-import { pushPath, popPath, slicePath } from './actions/PathActions';
+const expandRecursive = (nodeId, nodes) => {
+  const node = nodes.find(node => node.id == nodeId);
+
+  return {
+    ...node,
+    childNodes: node.childNodes.map(child => expandRecursive(child, nodes)),
+  }
+};
+
+const expand = (nodes) => {
+  const root = nodes.find(node => node.parent == null);
+  const tree = expandRecursive(root.id, nodes);
+  console.log(tree);
+  return tree;
+}
 
 const WadView = connect(
   (state) => {
-    const { path, files } = state;
-
-    const filename = path[0];
-    const file = files[filename];
-
-    if (path.length < 1 || typeof file === 'undefined') return {
-      directory: files,
-      path: [],
-      objects: [],
+    return {
+      nodes: state.nodes.length ? [expand(state.nodes)] : []
     }
-
-    const { relative_structure, objects } = file;
-    return {
-      directory: path.length > 1 ? at(file.relative_structure, [ path.slice(1) ])[0] : file.relative_structure,
-      path,
-      objects,
-    };
   },
-  (dispatch, ownProps) => {
+  (dispatch) => {
     return {
-      onPush: (event, object, key) => {
-        event.preventDefault();
-        if (typeof object === 'object') {
-          dispatch(pushPath(key))
-        } else return;
-      },
-      onPop: (event) => {
-        event.preventDefault();
-        dispatch(popPath());
-      },
-      onSlice: (event, end) => {
-        event.preventDefault();
-        dispatch(slicePath(end));
+      onNodeExpand: (node) => {
+        dispatch(nodeExpand(node))
       }
     }
   }
-)(StructureView);
+)(({nodes, onNodeExpand}) => (<Tree contents={nodes} className={Classes.ELEVATION_0} onNodeExpand={onNodeExpand} />));
 
 export default WadView;
